@@ -1,0 +1,74 @@
+﻿........................................................................ [ 24%]
+........................................................F.............FF [ 48%]
+FFFFFF......................................FFFFFFF.FFFF.FF.FFFFFFFFFFFF [ 73%]
+F........FFFFFFFFFFFF.F.FFFF...........F.F...F................F.F.FF...F [ 97%]
+....F.                                                                   [100%]
+============================== warnings summary ===============================
+tests/test_excel_generator.py::TestEmptyDataset::test_empty_transactions
+  C:\Users\admin\AppData\Local\Programs\Python\Python311\Lib\site-packages\xlsxwriter\worksheet.py:2353: UserWarning: Can't merge single cell
+    warn("Can't merge single cell")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_pipeline_orchestrator.py::TestOutputStructure::test_output_has_required_keys
+FAILED tests/test_recurring_engine.py::TestAmountConsistency::test_exact_match
+FAILED tests/test_recurring_engine.py::TestAmountConsistency::test_within_5_percent
+FAILED tests/test_recurring_engine.py::TestAmountConsistency::test_exceeds_5_percent
+FAILED tests/test_recurring_engine.py::TestAmountConsistency::test_single_amount
+FAILED tests/test_recurring_engine.py::TestAmountConsistency::test_empty - as...
+FAILED tests/test_recurring_engine.py::TestAmountConsistency::test_zero_amounts
+FAILED tests/test_recurring_engine.py::TestAmountConsistency::test_barely_within_tolerance
+FAILED tests/test_recurring_engine.py::TestAmountConsistency::test_barely_exceeds_tolerance
+FAILED tests/test_rule_engine.py::TestATMWithdrawal::test_atm_debit_classified[ATM-CASH HYDERABAD]
+FAILED tests/test_rule_engine.py::TestATMWithdrawal::test_atm_debit_classified[ATM CASH WDL SBI]
+FAILED tests/test_rule_engine.py::TestATMWithdrawal::test_atm_debit_classified[CASH WITHDRAWAL CHANDNI CHOWK]
+FAILED tests/test_rule_engine.py::TestATMWithdrawal::test_atm_debit_classified[CASH WDL ATM 12345]
+FAILED tests/test_rule_engine.py::TestATMWithdrawal::test_atm_debit_classified[NFS/ATM/CASH]
+FAILED tests/test_rule_engine.py::TestATMWithdrawal::test_atm_debit_classified[ATM WDL 0012345]
+FAILED tests/test_rule_engine.py::TestATMWithdrawal::test_atm_debit_classified[CASH W/D ATM]
+FAILED tests/test_rule_engine.py::TestLoanEMI::test_loan_debit_classified[EMI DEBIT HDFC LTD]
+FAILED tests/test_rule_engine.py::TestLoanEMI::test_loan_debit_classified[HOME LOAN EMI]
+FAILED tests/test_rule_engine.py::TestLoanEMI::test_loan_debit_classified[CAR LOAN PAYMENT]
+FAILED tests/test_rule_engine.py::TestLoanEMI::test_loan_debit_classified[LIC PREMIUM 12345]
+FAILED tests/test_rule_engine.py::TestLoanEMI::test_loan_debit_classified[PERSONAL LOAN INSTALLMENT]
+FAILED tests/test_rule_engine.py::TestLoanEMI::test_loan_debit_classified[HOUSING FINANCE EMI]
+FAILED tests/test_rule_engine.py::TestSalary::test_salary_credit_classified[SALARY CREDIT FOR JUN 2025]
+FAILED tests/test_rule_engine.py::TestSalary::test_salary_credit_classified[PAYROLL TRANSFER]
+FAILED tests/test_rule_engine.py::TestSalary::test_salary_credit_classified[SAL CR JUNE]
+FAILED tests/test_rule_engine.py::TestSalary::test_salary_credit_classified[SAL/JUNE 2025]
+FAILED tests/test_rule_engine.py::TestSalary::test_salary_credit_classified[MONTHLY SALARY]
+FAILED tests/test_rule_engine.py::TestSalary::test_salary_debit_not_classified
+FAILED tests/test_rule_engine.py::TestUPI::test_upi_debit_classified_as_payment[UPI-RAHUL SHARMA-9876543210@YBL]
+FAILED tests/test_rule_engine.py::TestUPI::test_upi_debit_classified_as_payment[UPI/P2P/123456789]
+FAILED tests/test_rule_engine.py::TestUPI::test_upi_debit_classified_as_payment[UPI-PAYMENT TO MERCHANT]
+FAILED tests/test_rule_engine.py::TestUPI::test_upi_credit_classified_as_credit[UPI-CR FROM RAHUL]
+FAILED tests/test_rule_engine.py::TestUPI::test_upi_credit_classified_as_credit[UPI/REFUND/123]
+FAILED tests/test_rule_engine.py::TestUPI::test_upi_credit_classified_as_credit[UPI-CREDIT]
+FAILED tests/test_rule_engine.py::TestUPI::test_upi_direction_never_swapped
+FAILED tests/test_rule_engine.py::TestBankTransfer::test_bank_transfer_credit_classified[NEFT CR-YESB0000001-PHONEPE]
+FAILED tests/test_rule_engine.py::TestBankTransfer::test_bank_transfer_credit_classified[RTGS INCOMING FROM ABC CORP]
+FAILED tests/test_rule_engine.py::TestBankTransfer::test_bank_transfer_credit_classified[IMPS CREDIT REF 12345]
+FAILED tests/test_rule_engine.py::TestBankTransfer::test_bank_transfer_credit_classified[FT - CR FROM SAVINGS]
+FAILED tests/test_rule_engine.py::TestBankTransfer::test_bank_transfer_debit_classified[NEFT DR TO SAVINGS]
+FAILED tests/test_rule_engine.py::TestBankTransfer::test_bank_transfer_debit_classified[RTGS PAYMENT TO VENDOR]
+FAILED tests/test_rule_engine.py::TestBankTransfer::test_bank_transfer_debit_classified[IMPS DEBIT REF 67890]
+FAILED tests/test_rule_engine.py::TestBankTransfer::test_bank_transfer_debit_classified[FT - DR TO CURRENT]
+FAILED tests/test_rule_engine.py::TestBankTransfer::test_bank_transfer_debit_classified[FUND TRANSFER TO ACC]
+FAILED tests/test_rule_engine.py::TestCashDeposit::test_cash_deposit_credit_classified[CASH DEPOSIT AT BRANCH]
+FAILED tests/test_rule_engine.py::TestCashDeposit::test_cash_deposit_credit_classified[CDM DEPOSIT 12345]
+FAILED tests/test_rule_engine.py::TestCashDeposit::test_cash_deposit_credit_classified[CASH DEP BRANCH HYDERABAD]
+FAILED tests/test_rule_engine.py::TestBillPayment::test_bill_debit_classified[BILL PAYMENT ELECTRICITY]
+FAILED tests/test_rule_engine.py::TestBillPayment::test_bill_debit_classified[BESCOM ELECTRICITY BILL]
+FAILED tests/test_rule_engine.py::TestBillPayment::test_bill_debit_classified[AIRTEL MOBILE RECHARGE]
+FAILED tests/test_rule_engine.py::TestBillPayment::test_bill_debit_classified[JIO PREPAID RECHARGE]
+FAILED tests/test_rule_engine.py::TestBillPayment::test_bill_debit_classified[BROADBAND PAYMENT]
+FAILED tests/test_rule_engine.py::TestPriorityOrder::test_loan_beats_bank_transfer
+FAILED tests/test_rule_engine.py::TestPriorityOrder::test_upi_beats_bank_transfer
+FAILED tests/test_rule_engine.py::TestPartialWordSafety::test_recharge_classifies_as_bill
+FAILED tests/test_rule_engine.py::TestOutputSchema::test_source_is_rule_engine
+FAILED tests/test_rule_engine.py::TestPerformance::test_10k_transactions - as...
+FAILED tests/test_rule_engine.py::TestRealWorldDescriptions::test_real_descriptions[UPI-TETALIVENKATARAJSE-9700767801@IBL-ICIC0000040-debit-UPI Payment]
+FAILED tests/test_rule_engine.py::TestRealWorldDescriptions::test_real_descriptions[NEFT CR-YESB0000001-PHONEPE PRIVATE LIMI-credit-Bank Transfer Credit]
+FAILED tests/test_rule_engine.py::TestRealWorldDescriptions::test_real_descriptions[IMPS-123456789-RAHUL TO SAVINGS-debit-Bank Transfer Debit]
+FAILED tests/test_rule_engine.py::TestRealWorldDescriptions::test_real_descriptions[CASH DEPOSIT AT BRANCH HYDERABAD-credit-Cash Deposit]
+61 failed, 233 passed, 1 warning in 2.69s

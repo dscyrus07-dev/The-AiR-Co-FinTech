@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+
+  backend:
+    build: ./backend
+    container_name: fintech_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres.ldfpqjlooogfhsszfope:fintech%40%23321@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CLAUDE_API_KEY: ${CLAUDE_API_KEY:-}
+      SUPABASE_URL: ${SUPABASE_URL:-https://ldfpqjlooogfhsszfope.supabase.co}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY:-}
+      TEMP_DIR: /app/tmp
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - backend_tmp:/app/tmp
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    build: ./frontend
+    container_name: fintech_frontend
+    restart: always
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "3000:3000"
+    environment:
+      BACKEND_URL: http://backend:8000
+      NEXT_PUBLIC_API_URL: http://backend:8000
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-https://ldfpqjlooogfhsszfope.supabase.co}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+
+volumes:
+  backend_tmp:
+    driver: local
+
+networks:
+  default:
+    name: airco-insights_default
+    external: true
