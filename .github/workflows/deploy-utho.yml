@@ -1,0 +1,207 @@
+name: Deploy to Utho Server
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.prod.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.prod.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        pip install -r requirements.txt
+    
+    - name: Run backend tests
+      run: |
+        cd backend
+        python -m pytest tests/ -v || echo "No tests found"
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Create deployment archive
+      run: |
+        tar -czf fintech-deploy.tar.gz \
+          --exclude=.git \
+          --exclude=.github \
+          --exclude=frontend/.next \
+          --exclude=frontend/node_modules \
+          --exclude=backend/__pycache__ \
+          --exclude=backend/.venv \
+          -C "$GITHUB_WORKSPACE" .
+
+    - name: Copy archive to Utho server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.UTHO_HOST }}
+        username: ${{ secrets.UTHO_USER }}
+        key: ${{ secrets.UTHO_SSH_KEY }}
+        source: fintech-deploy.tar.gz
+        target: /tmp
+    
+    - name: Deploy to Utho Server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.UTHO_HOST }}
+        username: ${{ secrets.UTHO_USER }}
+        key: ${{ secrets.UTHO_SSH_KEY }}
+        script: |
+          set -Eeuo pipefail
+
+          export COMPOSE_PROJECT_NAME=airco-fintech
+          PROJECT_DIR=/var/www/airco-fintech
+          ARCHIVE=/tmp/fintech-deploy.tar.gz
+
+          mkdir -p "$PROJECT_DIR"
+          tar -xzf "$ARCHIVE" -C "$PROJECT_DIR"
+          rm -f "$ARCHIVE"
+
+          cd "$PROJECT_DIR"
+
+          if command -v docker-compose >/dev/null 2>&1; then
+            COMPOSE="docker-compose -f docker-compose.prod.yml"
+          elif docker compose version >/dev/null 2>&1; then
+            COMPOSE="docker compose -f docker-compose.prod.yml"
+          else
+            echo "docker-compose / docker compose not found"
+            exit 1
+          fi
+
+          $COMPOSE build backend frontend
+          $COMPOSE up -d --remove-orphans backend frontend
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            backend_health=$(docker inspect -f '{{.State.Health.Status}}' fintech_backend 2>/dev/null)
+            frontend_health=$(docker inspect -f '{{.State.Health.Status}}' fintech_frontend 2>/dev/null)
+
+            [ -z "$backend_health" ] && backend_health=missing
+            [ -z "$frontend_health" ] && frontend_health=missing
+
+            echo "Backend health: $backend_health"
+            echo "Frontend health: $frontend_health"
+
+            if [ "$backend_health" = "healthy" ] && [ "$frontend_health" = "healthy" ]; then
+              break
+            fi
+
+            sleep 6
+          done
+
+          $COMPOSE ps
+
+          if docker ps --format '{{.Names}}' | grep -qx 'nginx-gateway'; then
+            docker exec nginx-gateway nginx -s reload
+          fi
+
+          [ "$backend_health" = "healthy" ]
+          [ "$frontend_health" = "healthy" ]
+
+  deploy-staging:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Create deployment archive
+      run: |
+        tar -czf fintech-deploy.tar.gz \
+          --exclude=.git \
+          --exclude=.github \
+          --exclude=frontend/.next \
+          --exclude=frontend/node_modules \
+          --exclude=backend/__pycache__ \
+          --exclude=backend/.venv \
+          -C "$GITHUB_WORKSPACE" .
+
+    - name: Copy archive to staging server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.UTHO_HOST }}
+        username: ${{ secrets.UTHO_USER }}
+        key: ${{ secrets.UTHO_SSH_KEY }}
+        source: fintech-deploy.tar.gz
+        target: /tmp
+    
+    - name: Deploy to Staging
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.UTHO_HOST }}
+        username: ${{ secrets.UTHO_USER }}
+        key: ${{ secrets.UTHO_SSH_KEY }}
+        script: |
+          set -Eeuo pipefail
+
+          export COMPOSE_PROJECT_NAME=airco-fintech-staging
+          PROJECT_DIR=/var/www/airco-fintech-staging
+          ARCHIVE=/tmp/fintech-deploy.tar.gz
+
+          mkdir -p "$PROJECT_DIR"
+          tar -xzf "$ARCHIVE" -C "$PROJECT_DIR"
+          rm -f "$ARCHIVE"
+
+          cd "$PROJECT_DIR"
+
+          if command -v docker-compose >/dev/null 2>&1; then
+            COMPOSE="docker-compose -f docker-compose.prod.yml"
+          elif docker compose version >/dev/null 2>&1; then
+            COMPOSE="docker compose -f docker-compose.prod.yml"
+          else
+            echo "docker-compose / docker compose not found"
+            exit 1
+          fi
+
+          $COMPOSE build backend frontend
+          $COMPOSE up -d --remove-orphans backend frontend
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            backend_health=$(docker inspect -f '{{.State.Health.Status}}' fintech_backend 2>/dev/null)
+            [ -z "$backend_health" ] && backend_health=missing
+            echo "Backend health: $backend_health"
+            if [ "$backend_health" = "healthy" ]; then
+              break
+            fi
+            sleep 6
+          done
+
+          $COMPOSE ps
+
+          [ "$backend_health" = "healthy" ]

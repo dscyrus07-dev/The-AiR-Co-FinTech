@@ -1,0 +1,54 @@
+name: Setup Server Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'setup'
+        type: choice
+        options:
+        - setup
+        - restart
+        - logs
+        - status
+
+jobs:
+  server-action:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Execute Server Action
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.UTHO_HOST }}
+        username: ${{ secrets.UTHO_USER }}
+        key: ${{ secrets.UTHO_SSH_KEY }}
+        script: |
+          cd /var/www/airco-fintech
+          
+          case "${{ github.event.inputs.action }}" in
+            "setup")
+              echo "Setting up environment..."
+              git clone https://github.com/${{ github.repository }}.git .
+              cp .env.prod .env
+              docker-compose -f docker-compose.prod.yml build --no-cache
+              docker-compose -f docker-compose.prod.yml up -d
+              ;;
+            "restart")
+              echo "Restarting services..."
+              docker-compose -f docker-compose.prod.yml restart
+              docker exec nginx-gateway nginx -s reload
+              ;;
+            "logs")
+              echo "Fetching logs..."
+              docker-compose -f docker-compose.prod.yml logs --tail=50
+              ;;
+            "status")
+              echo "Checking status..."
+              docker-compose -f docker-compose.prod.yml ps
+              curl -f http://localhost:8000/health
+              ;;
+          esac
